@@ -1,5 +1,6 @@
 import cv2
 import numpy as np
+import math
 
 import posenet.constants
 import posenet.analysis as anal
@@ -82,7 +83,7 @@ def draw_skel_and_kp(
     out_img = img
     adjacent_keypoints = []
     cv_keypoints = []
-    # cord_list = []
+    cords_dict = dict()
     for ii, score in enumerate(instance_scores):
         if score < min_pose_score:
             continue
@@ -92,16 +93,40 @@ def draw_skel_and_kp(
         adjacent_keypoints.extend(new_keypoints)
         for j, (ks, kc) in enumerate(zip(keypoint_scores[ii, :], keypoint_coords[ii, :, :])):
             if ks < min_part_score:
-                # cord_list.append((1,1))
                 continue
             cv_keypoints.append(cv2.KeyPoint(kc[1], kc[0], 10. * ks))
-            # cord_list.append(kc)
-            print('Keypoint %s, score = %f, coord = %s' % (posenet.PART_NAMES[ki], s, c))
+            cords_dict[j] = (kc[1], kc[0])
+            # print('Keypoint %s, score = %f, coord = %s' % (posenet.PART_NAMES[j], ks, kc))
 
-            # coords.append((kc[1], kc[0]))
+
+
+    if cords_dict.get(6) != None and cords_dict.get(8) != None and cords_dict.get(12) != None:
+        # print("all visible")
+        angle1 = anal.angle_p_calculation(cords_dict.get(12), cords_dict.get(6), cords_dict.get(8))
+        # print("right angle: ", str(anal.angle_p_calculation(cords_dict.get(12), cords_dict.get(6), cords_dict.get(8))))
+        if (angle1 < math.pi/4 - 0.1):
+            print("Move right arm up ")
+        elif (angle1 > math.pi/4 +0.1):
+            print("Move right arm down")
+        
+        rsx, rsy = (int(cords_dict.get(6)[0]), int(cords_dict.get(6)[1]))
+
+        out_img = cv2.putText(out_img, str(int(angle1*57.2957795)), (rsx, rsy), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 255), 2, cv2.LINE_AA)
+
+
+    if cords_dict.get(5) != None and cords_dict.get(7) != None and cords_dict.get(11) != None:
+        # print("all visible")
+        angle2 = anal.angle_p_calculation(cords_dict.get(11), cords_dict.get(5), cords_dict.get(7))
+        # print("left angle: ", str(anal.angle_p_calculation(cords_dict.get(11), cords_dict.get(5), cords_dict.get(7))))
+        if (angle2 < math.pi/4 -0.1):
+            print("Move left arm up")
+        elif (angle2 > math.pi/4 + 0.1):
+            print("Move left arm down")
+
     # if len(cord_list)!=0:
-    #     print(len(cord_list))
+    #     print("len cord_list: ", len(cord_list))
     #     print(anal.comparision(anal.form_angle_analysis(cord_list), [90]*9))
+
 
     out_img = cv2.drawKeypoints(
         out_img, cv_keypoints, outImage=np.array([]), color=(255, 255, 0),

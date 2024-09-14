@@ -4,12 +4,17 @@ import numpy as np
 
 import posenet.constants
 
+
+
 def angle_p_calculation(p1, p2, p3):
     v1 = ((p1[0]-p2[0]),(p1[1]-p2[1]))
     v2 = ((p3[0]-p2[0]),(p3[1]-p2[1]))
-    v1_dot_v2 = (v1[0] * v2[0]) + (v1[1] * v1[1])
+    # v1 = p2 - p1
+    # v2 = p3 - p2
+    v1_dot_v2 = (v1[0] * v2[0]) + (v1[1] * v2[1])
     denomonator = ((((v1[0]**2)+(v1[1]**2))**0.5)*(((v2[0]**2)+(v2[1]**2))**0.5))
-    print(denomonator)
+    # print(denomonator)
+    # print("div: ", str(v1_dot_v2/denomonator))
     theta = math.acos(v1_dot_v2/denomonator)
     return theta
 
@@ -26,14 +31,14 @@ def form_angle_analysis(form_cord):
         "rightHip":form_cord[12], "leftKnee":form_cord[13], "rightKnee":form_cord[14], "leftAnkle":form_cord[15],
         "rightAnkle":form_cord[16]}
     form_angles[0], form_angles[1] = head_analysis(part_dict["nose"], part_dict["leftShoulder"],part_dict["rightShoulder"])
-    form_angles[2] = head_analysis(part_dict["leftShoulder"], part_dict["leftElbow"],part_dict["leftWrist"])
-    form_angles[3] = head_analysis(part_dict["leftHip"], part_dict["leftShoulder"],part_dict["leftElbow"])
-    form_angles[4] = head_analysis(part_dict["rightShoulder"], part_dict["rightElbow"],part_dict["rightWrist"])
-    form_angles[5] = head_analysis(part_dict["rightHip"], part_dict["rightShoulder"],part_dict["rightElbow"])
-    form_angles[6] = head_analysis(part_dict["rightHip"], part_dict["leftHip"],part_dict["leftKnee"])
-    form_angles[7] = head_analysis(part_dict["leftHip"], part_dict["rightHip"],part_dict["rightKnee"])
-    form_angles[8] = head_analysis(part_dict["leftHip"], part_dict["leftKnee"],part_dict["leftAnkle"])
-    form_angles[9] = head_analysis(part_dict["rightHip"], part_dict["rightKnee"],part_dict["rightAnkle"])
+    form_angles[2] = angle_p_calculation(part_dict["leftShoulder"], part_dict["leftElbow"],part_dict["leftWrist"])
+    form_angles[3] = angle_p_calculation(part_dict["leftHip"], part_dict["leftShoulder"],part_dict["leftElbow"])
+    form_angles[4] = angle_p_calculation(part_dict["rightShoulder"], part_dict["rightElbow"],part_dict["rightWrist"])
+    form_angles[5] = angle_p_calculation(part_dict["rightHip"], part_dict["rightShoulder"],part_dict["rightElbow"])
+    form_angles[6] = angle_p_calculation(part_dict["rightHip"], part_dict["leftHip"],part_dict["leftKnee"])
+    form_angles[7] = angle_p_calculation(part_dict["leftHip"], part_dict["rightHip"],part_dict["rightKnee"])
+    form_angles[8] = angle_p_calculation(part_dict["leftHip"], part_dict["leftKnee"],part_dict["leftAnkle"])
+    form_angles[9] = angle_p_calculation(part_dict["rightHip"], part_dict["rightKnee"],part_dict["rightAnkle"])
     return form_angles
     #@TODO needs to acount for vereation in size of the form_cord
 def comparision(form_angle, perfect_angle):
